@@ -1,0 +1,78 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<h1 class="mb-4">История музыкального семплирования</h1>
+
+{% if active_artist %}
+<div class="alert alert-info py-2 shadow-sm d-flex justify-content-between align-items-center">
+    <span>Выбран артист: <strong>{{ active_artist.name }}</strong> (Показаны только его связи)</span>
+    <a href="/" class="btn btn-sm btn-outline-secondary">Сбросить фильтр 🔄</a>
+</div>
+    {% endif %}
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Каталог артистов</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for artist in artists %}
+                <a href="?artist_id={{ artist.id }}"
+                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if active_artist and active_artist.id == artist.id %}active{% endif %}">
+                    <strong>{{ artist.name }}</strong>
+                    <span class="badge bg-secondary rounded-pill">{{ artist.era }}</span>
+                </a>
+                {% empty %}
+                <div class="list-group-item text-muted">Артисты пока не добавлены.</div>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Граф заимствований (Последние данные)</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for relation in relations %}
+                <li class="list-group-item">
+                    Трек
+                    {% if relation.target_track.listen_link %}
+                    <a href="{{ relation.target_track.listen_link }}" target="_blank" class="text-primary fw-bold text-decoration-none" title="Слушать трек">{{ relation.target_track.title }} 🔗</a>
+                    {% else %}
+                    <span class="text-primary fw-bold">{{ relation.target_track.title }}</span>
+                    {% endif %}
+
+                    содержит <span class="badge bg-warning text-dark">{{ relation.get_sample_type_display }}</span>
+                    из оригинала
+
+                    {% if relation.source_track.listen_link %}
+                    <a href="{{ relation.source_track.listen_link }}" target="_blank" class="text-danger fw-bold text-decoration-none" title="Слушать оригинал">{{ relation.source_track.title }} 🔗</a>
+                    {% else %}
+                    <span class="text-danger fw-bold">{{ relation.source_track.title }}</span>
+                    {% endif %}
+                </li>
+                {% empty %}
+                <li class="list-group-item text-muted">Связи заимствований пока не добавлены.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow-sm mb-5">
+            <div class="card-body bg-white rounded">
+                {% if graph_html %}
+                {{ graph_html|safe }}
+                {% else %}
+                <p class="text-muted text-center my-4">Недостаточно данных для построения графа.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
